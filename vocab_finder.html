@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F3DEBA 0%, #e8d3a8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #F3DEBA;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #675D50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #675D50;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .search-section {
+            margin-bottom: 40px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 3px solid #ABC4AA;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            color: #675D50;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #A9907E;
+            box-shadow: 0 0 0 3px rgba(169, 144, 126, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-input::placeholder {
+            color: #675D50;
+            opacity: 0.6;
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(145deg, #A9907E, #8f7a6b);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(169, 144, 126, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(169, 144, 126, 0.4);
+            background: linear-gradient(145deg, #8f7a6b, #A9907E);
+        }
+
+        .search-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .speaker-btn {
+            padding: 12px;
+            background: linear-gradient(145deg, #ABC4AA, #96b095);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            box-shadow: 0 3px 10px rgba(171, 196, 170, 0.3);
+        }
+
+        .speaker-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(171, 196, 170, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #675D50;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid #ABC4AA;
+            border-top: 4px solid #A9907E;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-container {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 2px solid rgba(171, 196, 170, 0.3);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vocab-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(171, 196, 170, 0.3);
+        }
+
+        .vocab-title {
+            color: #675D50;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .pos-tag {
+            background: linear-gradient(145deg, #ABC4AA, #96b095);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .phonetic {
+            color: #A9907E;
+            font-size: 1.3rem;
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .meaning-section {
+            margin: 25px 0;
+        }
+
+        .meaning-title {
+            color: #675D50;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meaning-content {
+            color: #675D50;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #ABC4AA;
+        }
+
+        .thai-meaning {
+            background: rgba(171, 196, 170, 0.1);
+            color: #675D50;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #A9907E;
+        }
+
+        .synonym-list, .alternative-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .word-tag {
+            background: linear-gradient(145deg, #A9907E, #8f7a6b);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .word-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(169, 144, 126, 0.3);
+        }
+
+        .example-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ABC4AA;
+            font-style: italic;
+            color: #675D50;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: linear-gradient(145deg, #ff6b6b, #ff5252);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .flag-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .vocab-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .synonym-list, .alternative-list {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Vocabulary Finder</h1>
+            <p>Discover, learn, and master new words with AI-powered definitions</p>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Enter a word to explore..." />
+                <button id="speakerBtn" class="speaker-btn" title="Pronounce word">
+                    🔊
+                </button>
+                <button id="searchBtn" class="search-btn">Search</button>
+            </div>
+        </div>
+        
+        <div id="loadingDiv" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing your word with AI...</p>
+        </div>
+        
+        <div id="resultDiv"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyAJyFlG0FjLKsDzxkTcXv7eTJ2vmqMuJeQ';
+        
+        let currentWord = '';
+        
+        document.getElementById('searchBtn').addEventListener('click', searchWord);
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchWord();
+            }
+        });
+        
+        document.getElementById('speakerBtn').addEventListener('click', function() {
+            const word = document.getElementById('searchInput').value.trim();
+            if (word) {
+                pronounceWord(word);
+            }
+        });
+        
+        async function searchWord() {
+            const word = document.getElementById('searchInput').value.trim();
+            if (!word) {
+                alert('Please enter a word to search');
+                return;
+            }
+            
+            currentWord = word;
+            showLoading(true);
+            
+            try {
+                // Using a CORS proxy to bypass browser restrictions
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+                
+                const requestData = {
+                    contents: [{
+                        parts: [{
+                            text: `Please provide detailed information about the word "${word}" in the following format:
+
+Vocab: ${word}
+Parts of Speech: (provide the main part of speech, e.g., noun, verb, adjective)
+Phonetic Transcription: (provide IPA phonetic transcription)
+Meaning (Thai): (translate into Thai)
+Meaning (English): (provide clear English definition)
+Synonyms: (list 3-5 synonyms with their parts of speech in parentheses)
+Alternative words: (list 3-5 alternative words that can be used in place)
+Usage Context: (explain when and in what situations to use this word)
+Examples: (provide 3 example sentences)
+
+Please format your response clearly and make sure all sections are included.`
+                        }]
+                    }]
+                };
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    const content = data.candidates[0].content.parts[0].text;
+                    displayResult(content);
+                } else {
+                    throw new Error('No valid response from API');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Fallback to demo data if API fails
+                displayDemoResult(word);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayDemoResult(word) {
+            // Show demo result with explanation
+            document.getElementById('resultDiv').innerHTML = `
+                <div class="result-container">
+                    <div style="background: linear-gradient(145deg, #ff6b6b, #ff5252); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+                        <h3>⚠️ API Connection Issue</h3>
+                        <p>Due to CORS restrictions, the direct API call failed. Here's a demo result for "${word}":</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
+                            <strong>Solution:</strong> To use this with the real Gemini API, you'll need to:
+                            <br>1. Deploy this to a server with backend API handling
+                            <br>2. Use a CORS proxy service
+                            <br>3. Or integrate with your own backend server
+                        </p>
+                    </div>
+                    
+                    <div class="vocab-header">
+                        <h2 class="vocab-title">${word}</h2>
+                        <span class="pos-tag">verb</span>
+                        <span class="phonetic">/kənˈfɪɡjər/</span>
+                        <button class="speaker-btn" onclick="pronounceWord('${word}')" title="Pronounce word">
+                            🔊
+                        </button>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="thai-meaning">
+                            <span class="flag-icon">🇹🇭</span>กำหนดค่า, ตั้งค่า, จัดเรียง
+                        </div>
+                        
+                        <div class="meaning-title">
+                            <span class="flag-icon">🇺🇸</span>English Definition
+                        </div>
+                        <div class="meaning-content">
+                            To arrange something or put its parts together in a particular form or arrangement, especially in relation to computer systems, software, or technical equipment.
+                        </div>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            💡 Usage Context
+                        </div>
+                        <div class="meaning-content">
+                            "Configure" is frequently used when talking about setting up or arranging something, particularly in a technical or systematic manner. It's very common in the context of computers, software, networks, and electronic devices, where it refers to setting parameters, options, or components to achieve a desired functionality.
+                        </div>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            🔄 Synonyms
+                        </div>
+                        <div class="synonym-list">
+                            <span class="word-tag">arrange (verb)</span>
+                            <span class="word-tag">set up (verb)</span>
+                            <span class="word-tag">customize (verb)</span>
+                            <span class="word-tag">design (verb)</span>
+                            <span class="word-tag">organize (verb)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            ⚡ Alternative Words
+                        </div>
+                        <div class="alternative-list">
+                            <span class="word-tag">adjust</span>
+                            <span class="word-tag">modify</span>
+                            <span class="word-tag">tailor</span>
+                            <span class="word-tag">program</span>
+                            <span class="word-tag">install</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            📝 Examples
+                        </div>
+                        <div class="example-item">It used to take days to install and configure a server, and now it can be done in minutes.</div>
+                        <div class="example-item">Check that the device is present on the system and is configured correctly.</div>
+                        <div class="example-item">After I configured my laptop to start up from the CD-ROM drive rather than the hard drive, the installation went smoothly.</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function displayResult(content) {
+            const resultDiv = document.getElementById('resultDiv');
+            
+            // Parse the content
+            const lines = content.split('\n');
+            let vocab = '', pos = '', phonetic = '', thaiMeaning = '', englishMeaning = '';
+            let synonyms = [], alternatives = [], usageContext = '', examples = [];
+            
+            let currentSection = '';
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.toLowerCase().startsWith('vocab:')) {
+                    vocab = line.substring(6).trim();
+                } else if (line.toLowerCase().startsWith('parts of speech:')) {
+                    pos = line.substring(16).trim().replace(/[()]/g, '');
+                } else if (line.toLowerCase().startsWith('phonetic transcription:')) {
+                    phonetic = line.substring(23).trim();
+                } else if (line.toLowerCase().startsWith('meaning (thai):')) {
+                    thaiMeaning = line.substring(15).trim();
+                } else if (line.toLowerCase().startsWith('meaning (english):')) {
+                    englishMeaning = line.substring(18).trim();
+                } else if (line.toLowerCase().startsWith('synonyms:')) {
+                    const synonymText = line.substring(9).trim();
+                    synonyms = synonymText.split(',').map(s => s.trim()).filter(s => s);
+                } else if (line.toLowerCase().startsWith('alternative words:')) {
+                    const altText = line.substring(18).trim();
+                    alternatives = altText.split(',').map(s => s.trim()).filter(s => s);
+                } else if (line.toLowerCase().startsWith('usage context:')) {
+                    usageContext = line.substring(14).trim();
+                } else if (line.toLowerCase().startsWith('examples:')) {
+                    currentSection = 'examples';
+                } else if (currentSection === 'examples' && line.startsWith('-')) {
+                    examples.push(line.substring(1).trim());
+                } else if (currentSection === 'examples' && line && !line.startsWith('Vocab:')) {
+                    if (examples.length > 0) {
+                        examples[examples.length - 1] += ' ' + line;
+                    } else {
+                        examples.push(line);
+                    }
+                }
+            });
+            
+            // Use fallback values if parsing fails
+            vocab = vocab || currentWord;
+            pos = pos || 'unknown';
+            phonetic = phonetic || `/${currentWord}/`;
+            thaiMeaning = thaiMeaning || 'ไม่พบความหมาย';
+            englishMeaning = englishMeaning || 'Definition not available';
+            
+            resultDiv.innerHTML = `
+                <div class="result-container">
+                    <div class="vocab-header">
+                        <h2 class="vocab-title">${vocab}</h2>
+                        <span class="pos-tag">${pos}</span>
+                        <span class="phonetic">${phonetic}</span>
+                        <button class="speaker-btn" onclick="pronounceWord('${vocab}')" title="Pronounce word">
+                            🔊
+                        </button>
+                    </div>
+                    
+                    <div class="meaning-section">
+                        <div class="thai-meaning">
+                            <span class="flag-icon">🇹🇭</span>${thaiMeaning}
+                        </div>
+                        
+                        <div class="meaning-title">
+                            <span class="flag-icon">🇺🇸</span>English Definition
+                        </div>
+                        <div class="meaning-content">
+                            ${englishMeaning}
+                        </div>
+                    </div>
+                    
+                    ${usageContext ? `
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            💡 Usage Context
+                        </div>
+                        <div class="meaning-content">
+                            ${usageContext}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${synonyms.length > 0 ? `
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            🔄 Synonyms
+                        </div>
+                        <div class="synonym-list">
+                            ${synonyms.map(syn => `<span class="word-tag">${syn}</span>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${alternatives.length > 0 ? `
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            ⚡ Alternative Words
+                        </div>
+                        <div class="alternative-list">
+                            ${alternatives.map(alt => `<span class="word-tag">${alt}</span>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${examples.length > 0 ? `
+                    <div class="meaning-section">
+                        <div class="meaning-title">
+                            📝 Examples
+                        </div>
+                        ${examples.map(example => `<div class="example-item">${example}</div>`).join('')}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loadingDiv').style.display = show ? 'block' : 'none';
+        }
+        
+        function showError(message) {
+            document.getElementById('resultDiv').innerHTML = `
+                <div class="error">
+                    <h3>❌ Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        function pronounceWord(word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('Speech synthesis not supported in this browser');
+            }
+        }
+        
+        // Auto-focus on search input
+        document.getElementById('searchInput').focus();
+    </script>
+</body>
+</html>
